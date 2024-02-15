@@ -3,7 +3,7 @@ import type {UniqueIdentifier} from '@dnd-kit/core';
 import {AnimateLayoutChanges, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
-import {TreeItem, Props as TreeItemProps} from './TreeItem';
+import {TreeItem, TreeItemProps} from './TreeItem';
 import {iOS} from '../../utilities';
 
 interface Props extends TreeItemProps {

@@ -1,10 +1,12 @@
 import React, { forwardRef, HTMLAttributes } from 'react';
 import classNames from 'classnames';
 
-import { Action, Handle, Remove } from '../Item';
+import {Action} from '../Item/Action';
+import {Handle} from '../Item/Handle';
+import {Remove} from '../Item/Remove';
 import styles from './TreeItem.module.css';
 
-export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
+export interface TreeItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   childCount?: number;
   clone?: boolean;
   collapsed?: boolean;
@@ -23,7 +25,7 @@ export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   wrapperRef?(node: HTMLLIElement): void;
 }
 
-export const TreeItem = forwardRef<HTMLDivElement, Props>(
+export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
   (
     {
       childCount,

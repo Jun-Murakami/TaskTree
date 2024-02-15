@@ -3,11 +3,12 @@ import classNames from 'classnames';
 import type {DraggableSyntheticListeners} from '@dnd-kit/core';
 import type {Transform} from '@dnd-kit/utilities';
 
-import {Handle, Remove} from './components';
+import {Handle} from './Handle.tsx';
+import {Remove} from './Remove.tsx';
 
 import styles from './Item.module.css';
 
-export interface Props {
+export interface ItemsProps {
   dragOverlay?: boolean;
   color?: string;
   disabled?: boolean;
@@ -34,14 +35,14 @@ export interface Props {
     listeners: DraggableSyntheticListeners;
     ref: React.Ref<HTMLElement>;
     style: React.CSSProperties | undefined;
-    transform: Props['transform'];
-    transition: Props['transition'];
-    value: Props['value'];
+    transform: ItemsProps['transform'];
+    transition: ItemsProps['transition'];
+    value: ItemsProps['value'];
   }): React.ReactElement;
 }
 
 export const Item = React.memo(
-  React.forwardRef<HTMLLIElement, Props>(
+  React.forwardRef<HTMLLIElement, ItemsProps>(
     (
       {
         color,

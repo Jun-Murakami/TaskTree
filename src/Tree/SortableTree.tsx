@@ -36,7 +36,7 @@ import {
 } from './utilities';
 import type {FlattenedItem, SensorContext, TreeItems} from './types';
 import {sortableTreeKeyboardCoordinates} from './keyboardCoordinates';
-import {SortableTreeItem} from './components';
+import {SortableTreeItem} from './components/TreeItem/SortableTreeItem';
 import {CSS} from '@dnd-kit/utilities';
 
 const initialItems: TreeItems = [
