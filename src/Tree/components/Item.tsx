@@ -1,12 +1,10 @@
 import React, {useEffect} from 'react';
 import type {DraggableSyntheticListeners} from '@dnd-kit/core';
 import type {Transform} from '@dnd-kit/utilities';
-import { ListItem, Box, Typography } from '@mui/material';
+import { ListItem, Box, TextField } from '@mui/material';
 
 import {Handle} from './Actions.tsx';
 import {Remove} from './Actions.tsx';
-
-import styles from './Item.module.css';
 
 export interface ItemsProps {
   dragOverlay?: boolean;
@@ -39,6 +37,7 @@ export interface ItemsProps {
     transition: ItemsProps['transition'];
     value: ItemsProps['value'];
   }): React.ReactElement;
+  onChange?(value: string): void;
 }
 
 export const Item = React.memo(
@@ -162,11 +161,10 @@ export const Item = React.memo(
             }}
             data-cypress="draggable-item"
             {...(!handle ? listeners : undefined)}
-            {...props}
+            {...{...props, onChange: undefined}}
             tabIndex={!handle ? 0 : undefined}
           >
-            {value}
-            <Typography
+            <TextField
               sx={{
                 display: 'flex',
                 alignSelf: 'flex-start',
@@ -175,12 +173,15 @@ export const Item = React.memo(
                 marginBottom: '-15px',
                 marginRight: '-10px',
               }}
+              value={value}
+              onChange={(e) => props.onChange?.(e.target.value)}
             >
+              {value}
               {onRemove ? (
-                <Remove className={styles.Remove} onClick={onRemove} />
+                <Remove onClick={onRemove} />
               ) : null}
               {handle ? <Handle {...handleProps} {...listeners} /> : null}
-            </Typography>
+            </TextField>
           </Box>
         </ListItem>
       );

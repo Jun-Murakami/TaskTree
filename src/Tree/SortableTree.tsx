@@ -36,32 +36,36 @@ import {
 } from './utilities';
 import type {FlattenedItem, SensorContext, TreeItems} from './types';
 import {sortableTreeKeyboardCoordinates} from './keyboardCoordinates';
-import {SortableTreeItem} from './components/TreeItem/SortableTreeItem';
+import {SortableTreeItem} from './components/SortableTreeItem';
 import {CSS} from '@dnd-kit/utilities';
 
 const initialItems: TreeItems = [
   {
-    id: 'Home',
+    id: '0',
+    value: 'Home',
     children: [],
   },
   {
-    id: 'Collections',
+    id: '1',
+    value: 'Collections',
     children: [
-      {id: 'Spring', children: []},
-      {id: 'Summer', children: []},
-      {id: 'Fall', children: []},
-      {id: 'Winter', children: []},
+      {id: '2', value: 'Spring',children: []},
+      {id: '3', value: 'Summer',children: []},
+      {id: '4', value: 'Fall',children: []},
+      {id: '5', value: 'Winter',children: []},
     ],
   },
   {
-    id: 'About Us',
+    id: '6',
+    value: 'About Us',
     children: [],
   },
   {
-    id: 'My Account',
+    id: '7',
+    value: 'My Account',
     children: [
-      {id: 'Addresses', children: []},
-      {id: 'Order History', children: []},
+      {id: '8', value: 'Addresses',children: []},
+      {id: '9',value: 'Order History', children: []},
     ],
   },
 ];
@@ -188,6 +192,13 @@ export function SortableTree({
     },
   };
 
+  function handleValueChange(id: UniqueIdentifier, newValue: string) {
+    setItems((prevItems) => {
+      return setProperty(prevItems, id, 'value', () => newValue);
+    });
+  }
+  
+
   return (
     <DndContext
       accessibility={{announcements}}
@@ -201,11 +212,11 @@ export function SortableTree({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        {flattenedItems.map(({id, children, collapsed, depth}) => (
+        {flattenedItems.map(({id, value, children, collapsed, depth}) => (
           <SortableTreeItem
             key={id}
             id={id.toString()}
-            value={id.toString()}
+            value={value.toString()}
             depth={id === activeId && projected ? projected.depth : depth}
             indentationWidth={indentationWidth}
             indicator={indicator}
@@ -216,6 +227,7 @@ export function SortableTree({
                 : undefined
             }
             onRemove={removable ? () => handleRemove(id) : undefined}
+            onChange={(newValue) => handleValueChange(id, newValue)}
           />
         ))}
         {createPortal(
@@ -229,7 +241,7 @@ export function SortableTree({
                 depth={activeItem.depth}
                 clone
                 childCount={getChildCount(items, activeId) + 1}
-                value={activeId.toString()}
+                value={activeItem.value.toString()}
                 indentationWidth={indentationWidth}
               />
             ) : null}

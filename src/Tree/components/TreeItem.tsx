@@ -1,10 +1,11 @@
 import React, { forwardRef, HTMLAttributes } from 'react';
+import { Badge, TextField } from '@mui/material';
 import classNames from 'classnames';
 
-import {Action,Handle, Remove} from '../Item/Actions.tsx';
+import { Action, Handle, Remove } from './Actions.tsx';
 import styles from './TreeItem.module.css';
 
-export interface TreeItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
+export interface TreeItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'id' | 'onChange'> {
   childCount?: number;
   clone?: boolean;
   collapsed?: boolean;
@@ -21,6 +22,7 @@ export interface TreeItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'id'>
   onCollapse?(): void;
   onRemove?(): void;
   wrapperRef?(node: HTMLLIElement): void;
+  onChange?(value: string): void;
 }
 
 export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
@@ -41,6 +43,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
       style,
       value,
       wrapperRef,
+      onChange,
       ...props
     },
     ref
@@ -70,9 +73,19 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
               {collapseIcon}
             </Action>
           )}
-          <span className={styles.Text}>{value}</span>
+          <TextField
+            sx={{
+              flexGrow: 1,
+              paddingLeft: '0.5rem',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+            }}
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)} 
+          />
           {!clone && onRemove && <Remove onClick={onRemove} />}
-          {clone && childCount && childCount > 1 ? <span className={styles.Count}>{childCount}</span> : null}
+          {clone && childCount && childCount > 1 ? <Badge badgeContent={childCount} color="primary"/> : null}
         </div>
       </li>
     );
