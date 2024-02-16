@@ -1,7 +1,5 @@
 .Wrapper {
-  list-style: none;
   box-sizing: border-box;
-  padding-left: var(--spacing);
   margin-bottom: -1px;
 
   &.clone {
@@ -113,15 +111,5 @@
   .Count {
     user-select: none;
     -webkit-user-select: none;
-  }
-}
-
-.Collapse {
-  svg {
-    transition: transform 250ms ease;
-  }
-
-  &.collapsed svg {
-    transform: rotate(-90deg);
   }
 }

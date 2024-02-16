@@ -5,7 +5,7 @@ function App() {
 
   return (
     <>
-      <h1>SortableTree</h1>
+      <h1>Task Tree</h1>
       <SortableTree collapsible indicator removable />
     </>
   )
