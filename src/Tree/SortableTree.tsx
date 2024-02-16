@@ -95,7 +95,7 @@ const dropAnimationConfig: DropAnimation = {
   },
 };
 
-interface Props {
+interface SortableTreeProps {
   collapsible?: boolean;
   defaultItems?: TreeItems;
   indentationWidth?: number;
@@ -109,7 +109,7 @@ export function SortableTree({
   indicator = false,
   indentationWidth = 50,
   removable,
-}: Props) {
+}: SortableTreeProps) {
   const [items, setItems] = useState(() => defaultItems);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);

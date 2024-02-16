@@ -1,10 +1,10 @@
 import React, {useEffect} from 'react';
-import classNames from 'classnames';
 import type {DraggableSyntheticListeners} from '@dnd-kit/core';
 import type {Transform} from '@dnd-kit/utilities';
+import { ListItem, Box, Typography } from '@mui/material';
 
-import {Handle} from './Handle.tsx';
-import {Remove} from './Remove.tsx';
+import {Handle} from './Actions.tsx';
+import {Remove} from './Actions.tsx';
 
 import styles from './Item.module.css';
 
@@ -93,61 +93,96 @@ export const Item = React.memo(
           value,
         })
       ) : (
-        <li
-          className={classNames(
-            styles.Wrapper,
-            fadeIn && styles.fadeIn,
-            sorting && styles.sorting,
-            dragOverlay && styles.dragOverlay
-          )}
-          style={
-            {
-              ...wrapperStyle,
-              transition: [transition, wrapperStyle?.transition]
-                .filter(Boolean)
-                .join(', '),
-              '--translate-x': transform
-                ? `${Math.round(transform.x)}px`
-                : undefined,
-              '--translate-y': transform
-                ? `${Math.round(transform.y)}px`
-                : undefined,
-              '--scale-x': transform?.scaleX
-                ? `${transform.scaleX}`
-                : undefined,
-              '--scale-y': transform?.scaleY
-                ? `${transform.scaleY}`
-                : undefined,
-              '--index': index,
-              '--color': color,
-            } as React.CSSProperties
-          }
+        <ListItem
+          sx={{
+            ...wrapperStyle,
+            transition: [transition, wrapperStyle?.transition]
+              .filter(Boolean)
+              .join(', '),
+            '--translate-x': transform
+              ? `${Math.round(transform.x)}px`
+              : undefined,
+            '--translate-y': transform
+              ? `${Math.round(transform.y)}px`
+              : undefined,
+            '--scale-x': transform?.scaleX
+              ? `${transform.scaleX}`
+              : undefined,
+            '--scale-y': transform?.scaleY
+              ? `${transform.scaleY}`
+              : undefined,
+            '--index': index,
+            '--color': color,
+            // ここにstyles.Wrapperのスタイルをsxプロパティとして追加
+            display: 'flex',
+            boxSizing: 'border-box',
+            '&.fadeIn': {
+              animation: 'fadeIn 500ms ease',
+            },
+            '&.dragOverlay': {
+              '--scale': 1.05,
+              '--box-shadow': '0px 15px 15px 0 rgba(34, 33, 81, 0.25)',
+              '--box-shadow-picked-up': '-1px 0 15px 0 rgba(34, 33, 81, 0.01)',
+            },
+            ...(fadeIn && {
+              animation: 'fadeIn 500ms ease',
+            }),
+            ...(sorting && {
+              // sortingに関連するスタイルをここに追加
+            }),
+            ...(dragOverlay && {
+              '--scale': 1.05,
+              boxShadow: '0px 15px 15px 0 rgba(34, 33, 81, 0.25)',
+              '&:hover': {
+                boxShadow: '-1px 0 15px 0 rgba(34, 33, 81, 0.01)',
+              },
+            }),
+          }}
           ref={ref}
         >
-          <div
-            className={classNames(
-              styles.Item,
-              dragging && styles.dragging,
-              handle && styles.withHandle,
-              dragOverlay && styles.dragOverlay,
-              disabled && styles.disabled,
-              color && styles.color
-            )}
-            style={style}
+          <Box
+            sx={{
+              display: 'flex',
+              flexGrow: 1,
+              alignItems: 'center',
+              padding: '18px 20px',
+              backgroundColor: 'background.paper',
+              boxShadow: 1,
+              borderRadius: 1,
+              '&.dragging:not(.dragOverlay)': {
+                opacity: 0.5,
+                zIndex: 0,
+              },
+              // 他の条件に基づくスタイルも同様に追加
+              ...(dragging && { opacity: 0.5 }),
+              ...(handle && { cursor: 'grab' }),
+              ...(dragOverlay && { boxShadow: 3 }),
+              ...(disabled && { backgroundColor: 'grey.300' }),
+              ...(color && { color: color }), // colorがpropsから渡される場合
+            }}
             data-cypress="draggable-item"
             {...(!handle ? listeners : undefined)}
             {...props}
             tabIndex={!handle ? 0 : undefined}
           >
             {value}
-            <span className={styles.Actions}>
+            <Typography
+              sx={{
+                display: 'flex',
+                alignSelf: 'flex-start',
+                marginTop: '-12px',
+                marginLeft: 'auto',
+                marginBottom: '-15px',
+                marginRight: '-10px',
+              }}
+            >
               {onRemove ? (
                 <Remove className={styles.Remove} onClick={onRemove} />
               ) : null}
               {handle ? <Handle {...handleProps} {...listeners} /> : null}
-            </span>
-          </div>
-        </li>
+            </Typography>
+          </Box>
+        </ListItem>
       );
     }
   )

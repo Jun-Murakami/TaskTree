@@ -1,9 +1,7 @@
 import React, { forwardRef, HTMLAttributes } from 'react';
 import classNames from 'classnames';
 
-import {Action} from '../Item/Action';
-import {Handle} from '../Item/Handle';
-import {Remove} from '../Item/Remove';
+import {Action,Handle, Remove} from '../Item/Actions.tsx';
 import styles from './TreeItem.module.css';
 
 export interface TreeItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
