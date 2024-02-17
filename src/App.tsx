@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { findMaxId, isDescendantOfTrash } from './Tree/utilities';
 import { SortableTree } from './Tree/SortableTree';
@@ -11,6 +11,7 @@ import './App.css';
 interface AppProps {
   darkMode: boolean;
   setDarkMode: (value: boolean) => void;
+  token: string|null;
 }
 
 const initialItems: TreeItem[] = [
@@ -50,7 +51,7 @@ const initialItems: TreeItem[] = [
   },
 ];
 
-function App({ darkMode, setDarkMode }: AppProps) {
+function App({ darkMode, setDarkMode,token }: AppProps) {
   // 完了したタスクの表示/非表示を制御するための状態
   const [hideDoneItems, setHideDoneItems] = useState(false);
   const [items, setItems] = useState<TreeItem[]>(initialItems);
@@ -155,6 +156,39 @@ function App({ darkMode, setDarkMode }: AppProps) {
       borderRadius: 20 / 2,
     },
   }));
+
+    // Google Driveに状態を保存する関数
+    const saveAppStateToGoogleDrive = async (token: string, appStateJSON: string) => {
+      const metadata = {
+        name: 'app_state.json', // ファイル名
+        mimeType: 'application/json', // MIMEタイプ
+      };
+    
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', new Blob([appStateJSON], { type: 'application/json' }));
+    
+      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: new Headers({ 'Authorization': `Bearer ${token}` }),
+        body: form,
+      });
+    
+      return response.json(); // 保存したファイルの情報を返す
+    };
+
+    // 状態が変更されたとき（例: アイテムの追加、完了タスクの表示/非表示の切り替え、ダークモードの切り替え）に呼び出す
+    useEffect(() => {
+      if (token) { // トークンがnullでないことを確認
+        const appState = { items, hideDoneItems, darkMode };
+        const appStateJSON = JSON.stringify(appState);
+        saveAppStateToGoogleDrive(token, appStateJSON).then(() => {
+          console.log("アプリの状態がGoogle Driveに保存されました。");
+        }).catch((error) => {
+          console.error("アプリの状態の保存に失敗しました。", error);
+        });
+      }
+    }, [items, hideDoneItems, darkMode, token]);
 
   return (
     <Box sx={{

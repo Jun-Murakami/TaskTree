@@ -1,4 +1,4 @@
-import React, { forwardRef, HTMLAttributes } from 'react';
+import { forwardRef, HTMLAttributes } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { useTheme } from '@mui/material/styles';
 import { ListItem, Stack, Badge, TextField, Checkbox, Button, Typography } from '@mui/material';
