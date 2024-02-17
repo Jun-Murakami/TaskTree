@@ -1,15 +1,23 @@
-import React from 'react'
+import React,{useState} from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { theme } from './mui_theme';
+import { theme,darkTheme } from './mui_theme';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+
+function Main() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  return (
+    <ThemeProvider theme={darkMode ? darkTheme : theme}>
+      <CssBaseline />
+      <App darkMode={darkMode} setDarkMode={setDarkMode}/>
+    </ThemeProvider>
+  );
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <Main />
   </React.StrictMode>,
-)
+);

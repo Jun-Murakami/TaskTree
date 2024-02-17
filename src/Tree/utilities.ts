@@ -138,6 +138,37 @@ export function findItemDeep(
   return undefined;
 }
 
+export function findParentItem(items: TreeItems, itemId: UniqueIdentifier): TreeItem | undefined {
+  for (const item of items) {
+    if (item.children.some(child => child.id === itemId)) {
+      return item;
+    }
+    const foundInChild = findParentItem(item.children, itemId);
+    if (foundInChild) return foundInChild;
+  }
+  return undefined;
+}
+
+export function isDescendantOfTrash(items: TreeItems, itemId: UniqueIdentifier): boolean {
+  const parentItem = findParentItem(items, itemId);
+  if (!parentItem) return false;
+  if (parentItem.id === 'trash') return true;
+  return isDescendantOfTrash(items, parentItem.id);
+}
+
+export function findMaxId(items: TreeItems, currentMax = 0)  {
+  items.forEach(item => {
+    const itemId = typeof item.id === 'string' ? parseInt(item.id, 10) : item.id;
+    if (itemId > currentMax) {
+      currentMax = itemId;
+    }
+    if (item.children && item.children.length > 0) {
+      currentMax = findMaxId(item.children, currentMax);
+    }
+  });
+  return currentMax;
+}
+
 export function removeItem(items: TreeItems, id: UniqueIdentifier) {
   const newItems = [];
 
