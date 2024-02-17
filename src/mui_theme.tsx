@@ -11,7 +11,7 @@ export const theme = createTheme({
       main: '#ef0a0a',
     },
   },
-  
+
   typography: {
     fontFamily: [
       '"M PLUS Rounded 1c"',

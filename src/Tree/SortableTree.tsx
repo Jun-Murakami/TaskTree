@@ -38,7 +38,6 @@ import { sortableTreeKeyboardCoordinates } from './keyboardCoordinates';
 import { SortableTreeItem } from './SortableTreeItem';
 import { CSS } from '@dnd-kit/utilities';
 
-
 const measuring = {
   droppable: {
     strategy: MeasuringStrategy.Always,
