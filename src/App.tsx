@@ -164,15 +164,19 @@ function App({ items,setItems,hideDoneItems,setHideDoneItems,darkMode, setDarkMo
 
     // 状態が変更されたとき（例: アイテムの追加、完了タスクの表示/非表示の切り替え、ダークモードの切り替え）に呼び出す
     useEffect(() => {
-      if (token) { // トークンがnullでないことを確認
-        const appState = { items, hideDoneItems, darkMode };
-        const appStateJSON = JSON.stringify(appState);
-        saveOrUpdateAppStateToGoogleDrive(token, appStateJSON).then(() => {
-          //console.log("アプリの状態がGoogle Driveに保存されました。");
-        }).catch((error: unknown) => {
-          console.error("アプリの状態の保存に失敗しました。", error);
-        });
-      }
+      const debounceSave = setTimeout(() => {
+        if (token) {
+          const appState = { items, hideDoneItems, darkMode };
+          const appStateJSON = JSON.stringify(appState);
+          saveOrUpdateAppStateToGoogleDrive(token, appStateJSON).then(() => {
+            //console.log("アプリの状態がGoogle Driveに保存されました。");
+          }).catch((error: unknown) => {
+            console.error("アプリの状態の保存に失敗しました。", error);
+          });
+        }
+      }, 10000); // 10秒のデバウンス
+    
+      return () => clearTimeout(debounceSave); // コンポーネントがアンマウントされるか、依存配列の値が変更された場合にタイマーをクリア
     }, [items, hideDoneItems, darkMode, token, saveOrUpdateAppStateToGoogleDrive]);
 
   return (
