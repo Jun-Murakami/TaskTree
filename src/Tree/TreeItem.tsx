@@ -13,6 +13,7 @@ export interface TreeItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'id' 
   clone?: boolean;
   collapsed?: boolean;
   depth: number;
+  darkMode?: boolean;
   disableInteraction?: boolean;
   disableSelection?: boolean;
   ghost?: boolean;
@@ -38,6 +39,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
       childCount,
       clone,
       depth,
+      darkMode,
       disableSelection,
       disableInteraction,
       ghost,
@@ -64,7 +66,25 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
       width: '100%',
       p: 1,
       border: '1px solid',
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: darkMode
+        ? depth >= 4
+          ? theme.palette.grey[800]
+          : depth === 3
+          ? '#303030'
+          : depth === 2
+          ? theme.palette.grey[900]
+          : depth === 1
+          ? '#1a1a1a'
+          : theme.palette.background.default
+        : depth >= 4
+        ? theme.palette.grey[300]
+        : depth === 3
+        ? theme.palette.grey[200]
+        : depth === 2
+        ? theme.palette.grey[100]
+        : depth === 1
+        ? theme.palette.grey[50]
+        : theme.palette.background.default,
       borderColor: theme.palette.divider,
       boxSizing: 'border-box',
       ...(clone && {
@@ -136,12 +156,21 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
               <DragHandleIcon />
             </Button>
           ) : (
-            <Button sx={{ color: theme.palette.text.secondary, width: '50px', minWidth: '50px' }} onClick={() => id !== undefined && onSelect?.(id)}>
+            <Button
+              sx={{ color: theme.palette.text.secondary, width: '50px', minWidth: '50px' }}
+              onClick={() => id !== undefined && onSelect?.(id)}
+            >
               <DeleteIcon />
             </Button>
           )}
           {onCollapse && (
-            <Button sx={{ color: theme.palette.text.secondary, width: '50px', minWidth: '50px' }} onClick={() => {onCollapse?.();id !== undefined && onSelect?.(id);  }}>
+            <Button
+              sx={{ color: theme.palette.text.secondary, width: '50px', minWidth: '50px' }}
+              onClick={() => {
+                onCollapse?.();
+                id !== undefined && onSelect?.(id);
+              }}
+            >
               <KeyboardArrowDownIcon
                 style={{ transition: 'transform 250ms ease', transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}
               />

@@ -1,120 +1,142 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
+import { TreeItem } from './Tree/types';
 import './index.css';
 import { theme, darkTheme } from './mui_theme';
-import { CssBaseline, ThemeProvider, Button,CircularProgress } from '@mui/material';
+import { CssBaseline, ThemeProvider, Button} from '@mui/material';
 
-import { getAuth, GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app';
-//import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_API_KEY,
-  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_APP_ID,
-  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
-};
-
-// Initialize Firebase
-initializeApp(firebaseConfig);
-
-//const analytics = getAnalytics(app);
-
-const auth = getAuth();
+const initialItems: TreeItem[] = [
+  {
+    id: '0',
+    value: '案件1',
+    done: false,
+    children: [
+      { id: '1', value: 'すぐやる', done: false, children: [
+        { id: '2', value: 'Aさんに電話を掛ける\n000-0000-0000', done: false, children: [] },
+        { id: '3', value: 'Bさんにメールを返す', done: true, children: [] },
+      ] },
+      { id: '4', value: 'あとでやる', done: false, children: [] },
+      { id: '5', value: '後で考える', done: false, children: [] },
+      { id: '6', value: 'いつかやる', done: false, children: [] },
+    ],
+  },
+  {
+    id: '7',
+    value: '案件2',
+    done: false,
+    children: [
+      { id: '8', value: 'すぐやる', done: false, children: [] },
+      { id: '9', value: 'あとでやる', done: false, children: [] },
+    ],
+  },
+  {
+    id: '10',
+    value: 'プライベート',
+    done: false,
+    children: [],
+  },
+  {
+    id: 'trash',
+    value: 'Trash',
+    children: [],
+  },
+];
 
 function Main() {
   const [darkMode, setDarkMode] = useState(false);
+  const [items, setItems] = useState<TreeItem[]>([]);
+  const [hideDoneItems, setHideDoneItems] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true); // ローディング状態を管理する状態変数
   const [token, setToken] = useState<string | null>(null); // Googleのアクセストークンを保持するための状態
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setLoading(true);
-      if (user) {
-        setIsLoggedIn(true);
-  
-        // Firebase経由でGoogleのアクセストークンを取得
-        user.getIdTokenResult().then((idTokenResult) => {
-          if ('google.com' in idTokenResult.claims) {
-            // claimsの型を明示的に指定
-            const claims = idTokenResult.claims as { 'google.com': { access_token: string } };
-            const accessToken = claims['google.com'].access_token;
-            setToken(accessToken); // 状態を更新
-          } else {
-            console.error("'google.com' property is not found in claims");
-          }
-        });
-  
-        setLoading(false);
-      } else {
-        setIsLoggedIn(false);
-        setLoading(false);
-      }
-    });
-  
-    return () => unsubscribe();
-  }, []);
-
-
-  const handleLogin = () => {
-    setLoading(true);
-    const provider = new GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/drive'); // Google Driveのスコープを追加
-    signInWithRedirect(auth, provider);
-  };
+  const handleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setIsLoggedIn(true);
+      setToken(tokenResponse.access_token);
+    },
+    onError: errorResponse => console.log(errorResponse),
+    scope: 'https://www.googleapis.com/auth/drive.file'
+  });
 
   const handleLogout = () => {
-    auth.signOut().then(() => {
-      setLoading(false); // ログアウト後にローディング状態をfalseに設定
-      setIsLoggedIn(false);
-    });
+    googleLogout();
+    setIsLoggedIn(false);
   };
 
-  // ローディング中はローディングインジケーターを表示
-  if (loading) {
-    return <CircularProgress />;
-  }
+  useEffect(() => {
+    const restoreAppState = async () => {
+      if (isLoggedIn && token) {
+        const fileName = 'TaskTree.json';
+        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'`, {
+          method: 'GET',
+          headers: new Headers({ 'Authorization': `Bearer ${token}` }),
+        });
+        const result = await response.json();
+        const fileId = result.files.length > 0 ? result.files[0].id : null;
+  
+        if (fileId) {
+          // ファイルが存在する場合の処理
+          const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            method: 'GET',
+            headers: new Headers({ 'Authorization': `Bearer ${token}` }),
+          });
+          const appState = await fileResponse.json();
+          setItems(appState.items);
+          setHideDoneItems(appState.hideDoneItems);
+          setDarkMode(appState.darkMode);
+        } else {
+          // ファイルが存在しない場合、initialItemsを使用して状態を初期化
+          setItems(initialItems);
+        }
+      }
+    };
+  
+    restoreAppState();
+  }, [isLoggedIn, token]);
 
   return (
     <ThemeProvider theme={darkMode ? darkTheme : theme}>
       <CssBaseline />
-      {isLoggedIn ? (
-        <>
-          <App darkMode={darkMode} setDarkMode={setDarkMode} token={token} />
-          <Button
-            onClick={handleLogout}
-            variant="outlined"
-            sx={{
-              position: 'fixed',
-              bottom: 20,
-              right: 30,
-            }}
-          >
-            ログアウト
+        {isLoggedIn ? (
+          <>
+            <App
+              items={items}
+              setItems={setItems}
+              hideDoneItems={hideDoneItems}
+              setHideDoneItems={setHideDoneItems}
+              darkMode={darkMode}
+              setDarkMode={setDarkMode}
+              token={token}
+            />
+            <Button
+              onClick={handleLogout}
+              variant="outlined"
+              sx={{
+                zIndex: 1000,
+                position: 'fixed',
+                bottom: 20,
+                right: 30,
+              }}
+            >
+              ログアウト
+            </Button>
+          </>
+        ) : (
+          <Button onClick={() => handleLogin()} variant={'contained'}>
+            Googleでログイン
           </Button>
-        </>
-      ) : (
-        <Button onClick={handleLogin} variant={'contained'}>
-          Googleでログイン
-        </Button>
-      )}
+        )}
     </ThemeProvider>
   );
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Main />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_DRIVE_API_KEY}>
+      <Main />
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );

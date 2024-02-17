@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Dispatch, SetStateAction } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { findMaxId, isDescendantOfTrash } from './Tree/utilities';
 import { SortableTree } from './Tree/SortableTree';
@@ -9,52 +9,16 @@ import AddIcon from '@mui/icons-material/Add';
 import './App.css';
 
 interface AppProps {
+  items: TreeItem[];
+  setItems: Dispatch<SetStateAction<TreeItem[]>>;
+  hideDoneItems: boolean; // この行を追加
+  setHideDoneItems: Dispatch<SetStateAction<boolean>>; // この行を追加
   darkMode: boolean;
-  setDarkMode: (value: boolean) => void;
-  token: string|null;
+  setDarkMode: Dispatch<SetStateAction<boolean>>;
+  token: string | null;
 }
 
-const initialItems: TreeItem[] = [
-  {
-    id: '0',
-    value: '案件1',
-    done: false,
-    children: [
-      { id: '1', value: 'すぐやる', done: false, children: [
-        { id: '2', value: 'Aさんに電話を掛ける\n000-0000-0000', done: false, children: [] },
-        { id: '3', value: 'Bさんにメールを返す', done: true, children: [] },
-      ] },
-      { id: '4', value: 'あとでやる', done: false, children: [] },
-      { id: '5', value: '後で考える', done: false, children: [] },
-      { id: '6', value: 'いつかやる', done: false, children: [] },
-    ],
-  },
-  {
-    id: '7',
-    value: '案件2',
-    done: false,
-    children: [
-      { id: '8', value: 'すぐやる', done: false, children: [] },
-      { id: '9', value: 'あとでやる', done: false, children: [] },
-    ],
-  },
-  {
-    id: '10',
-    value: 'プライベート',
-    done: false,
-    children: [],
-  },
-  {
-    id: 'trash',
-    value: 'Trash',
-    children: [],
-  },
-];
-
-function App({ darkMode, setDarkMode,token }: AppProps) {
-  // 完了したタスクの表示/非表示を制御するための状態
-  const [hideDoneItems, setHideDoneItems] = useState(false);
-  const [items, setItems] = useState<TreeItem[]>(initialItems);
+function App({ items,setItems,hideDoneItems,setHideDoneItems,darkMode, setDarkMode,token }: AppProps) {
   const [lastSelectedItemId, setLastSelectedItemId] = useState<UniqueIdentifier | null>(null);
 
   const handleSelect = (id: UniqueIdentifier) => {
@@ -85,28 +49,27 @@ function App({ darkMode, setDarkMode,token }: AppProps) {
     const newTaskId = findMaxId(items) + 1;
     const newTask = {
       id: newTaskId.toString(),
-      value: 'id:' + newTaskId,
+      value: '',
       done: false,
       children: []
     };
   
     if (lastSelectedItemId === 'trash' || (lastSelectedItemId !== null && isDescendantOfTrash(items, lastSelectedItemId)) || lastSelectedItemId === null) {
       // ゴミ箱のルートツリーの直前のルートにタスクを追加
-      setItems(prevItems => {
-        const trashIndex = prevItems.findIndex(item => item.id === 'trash');
-        if (trashIndex > 0) {
-          // ゴミ箱がリストの最初でない場合、ゴミ箱の直前に新しいタスクを挿入
-          const updatedItems = [...prevItems];
-          updatedItems.splice(trashIndex, 0, newTask);
-          return updatedItems;
-        } else {
-          // ゴミ箱がリストの最初または見つからない場合、リストの最初に追加
-          return [newTask, ...prevItems];
-        }
-      });
+      const newItems = [...items]; // 現在のアイテムのコピーを作成
+      const trashIndex = newItems.findIndex(item => item.id === 'trash');
+      if (trashIndex > 0) {
+        // ゴミ箱がリストの最初でない場合、ゴミ箱の直前に新しいタスクを挿入
+        newItems.splice(trashIndex, 0, newTask);
+      } else {
+        // ゴミ箱がリストの最初または見つからない場合、リストの最初に追加
+        newItems.unshift(newTask); // 配列の先頭に追加
+      }
+      setItems(newItems); // 更新されたアイテムの配列をセット
     } else {
       // 以前のロジックを使用して、選択したアイテムの直下に新しいアイテムを追加
-      setItems(prevItems => addItemToNestedChildren(prevItems, lastSelectedItemId, newTask));
+      const updatedItems = addItemToNestedChildren(items, lastSelectedItemId, newTask);
+      setItems(updatedItems);
     }
   };
 
@@ -157,38 +120,60 @@ function App({ darkMode, setDarkMode,token }: AppProps) {
     },
   }));
 
-    // Google Driveに状態を保存する関数
-    const saveAppStateToGoogleDrive = async (token: string, appStateJSON: string) => {
+    // Google DriveからファイルIDを検索する関数
+    const getFileIdByName = async (token: string, fileName: string) => {
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'`, {
+        method: 'GET',
+        headers: new Headers({ 'Authorization': `Bearer ${token}` }),
+      });
+      const result = await response.json();
+      return result.files.length > 0 ? result.files[0].id : null;
+    };
+
+    // Google Driveに状態を保存する関数（同名のファイルを上書き）
+    const saveOrUpdateAppStateToGoogleDrive = useCallback(async (token: string, appStateJSON: string) => {
+      const fileName = 'TaskTree.json';
+      const fileId = await getFileIdByName(token, fileName);
+
       const metadata = {
-        name: 'app_state.json', // ファイル名
-        mimeType: 'application/json', // MIMEタイプ
+        name: fileName,
+        mimeType: 'application/json',
       };
-    
+
       const form = new FormData();
       form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
       form.append('file', new Blob([appStateJSON], { type: 'application/json' }));
-    
-      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
+
+      let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+      let method = 'POST';
+
+      // 既存のファイルが見つかった場合、URLとメソッドを更新
+      if (fileId) {
+        url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+        method = 'PATCH';
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: new Headers({ 'Authorization': `Bearer ${token}` }),
         body: form,
       });
-    
-      return response.json(); // 保存したファイルの情報を返す
-    };
+
+      return response.json();
+    }, []); // この関数が依存する外部の変数がない場合は、依存配列を空にします
 
     // 状態が変更されたとき（例: アイテムの追加、完了タスクの表示/非表示の切り替え、ダークモードの切り替え）に呼び出す
     useEffect(() => {
       if (token) { // トークンがnullでないことを確認
         const appState = { items, hideDoneItems, darkMode };
         const appStateJSON = JSON.stringify(appState);
-        saveAppStateToGoogleDrive(token, appStateJSON).then(() => {
-          console.log("アプリの状態がGoogle Driveに保存されました。");
-        }).catch((error) => {
+        saveOrUpdateAppStateToGoogleDrive(token, appStateJSON).then(() => {
+          //console.log("アプリの状態がGoogle Driveに保存されました。");
+        }).catch((error: unknown) => {
           console.error("アプリの状態の保存に失敗しました。", error);
         });
       }
-    }, [items, hideDoneItems, darkMode, token]);
+    }, [items, hideDoneItems, darkMode, token, saveOrUpdateAppStateToGoogleDrive]);
 
   return (
     <Box sx={{
@@ -208,7 +193,7 @@ function App({ darkMode, setDarkMode,token }: AppProps) {
           label="Mode"
         />
       </Stack>
-      <SortableTree collapsible indicator removable hideDoneItems={hideDoneItems} items={items} setItems={setItems} onSelect={handleSelect}/>
+      <SortableTree collapsible indicator removable hideDoneItems={hideDoneItems} items={items} darkMode={darkMode} setItems={setItems} onSelect={handleSelect}/>
     </Box>
   );
 }

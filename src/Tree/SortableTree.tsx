@@ -72,6 +72,7 @@ interface SortableTreeProps {
   items: TreeItems;
   setItems: React.Dispatch<React.SetStateAction<TreeItems>>;
   collapsible?: boolean;
+  darkMode?: boolean;
   defaultItems?: TreeItems;
   indentationWidth?: number;
   indicator?: boolean;
@@ -84,6 +85,7 @@ export function SortableTree({
   items,
   setItems,
   collapsible,
+  darkMode,
   indicator = false,
   indentationWidth = 50,
   removable,
@@ -202,6 +204,7 @@ export function SortableTree({
               value={value.toString()}
               done={done}
               depth={id === activeId && projected ? projected.depth : depth}
+              darkMode={darkMode}
               indentationWidth={indentationWidth}
               indicator={indicator}
               collapsed={Boolean(collapsed && children.length)}
@@ -218,6 +221,7 @@ export function SortableTree({
               <SortableTreeItem
                 id={activeId}
                 depth={activeItem.depth}
+                darkMode={darkMode}
                 clone
                 childCount={getChildCount(items, activeId) + 1}
                 value={activeItem.value.toString()}
