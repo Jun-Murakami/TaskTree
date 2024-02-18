@@ -13,6 +13,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  color: #ffffff; /* 選択されたテキストの文字色 */
+  background: #2e748d; /* 選択されたテキストの背景色 */
+}
+
 a {
   font-weight: 500;
   color: #646cff;

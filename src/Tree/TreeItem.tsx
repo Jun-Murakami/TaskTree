@@ -1,4 +1,4 @@
-import { forwardRef, HTMLAttributes } from 'react';
+import { forwardRef, HTMLAttributes, useState } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { useTheme } from '@mui/material/styles';
 import { ListItem, Stack, Badge, TextField, Checkbox, Button, Typography } from '@mui/material';
@@ -61,6 +61,8 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
     ref
   ) => {
     const theme = useTheme();
+    const [isFocusedOrHovered, setIsFocusedOrHovered] = useState(false);
+
 
     const stackStyles = (clone: boolean | undefined, ghost: boolean | undefined) => ({
       width: '100%',
@@ -200,6 +202,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
                 fullWidth
                 sx={{ padding: 0, margin: 'auto 0', marginX: 1 }}
                 InputProps={{
+                  disableUnderline: !isFocusedOrHovered,
                   style: {
                     padding: 0,
                     margin: 0,
@@ -209,10 +212,14 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
                     fontSize: '0.9rem',
                   },
                 }}
+                onFocus={() => setIsFocusedOrHovered(true)}
+                onBlur={() => {
+                  setTimeout(() => setIsFocusedOrHovered(false), 300);
+                }}
               />
               {!clone && onRemove && (
                 <Button
-                  sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px', margin: 'auto 0' }}
+                  sx={{ color: theme.palette.grey[500], width: '30px', minWidth: '30px', height: '30px', margin: 'auto 0' }}
                   onClick={onRemove}
                 >
                   <CloseIcon />
