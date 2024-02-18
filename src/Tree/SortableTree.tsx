@@ -86,7 +86,7 @@ export function SortableTree({
   collapsible,
   darkMode,
   indicator = false,
-  indentationWidth = 50,
+  indentationWidth = 30,
   removable,
   hideDoneItems = false,
   onSelect,

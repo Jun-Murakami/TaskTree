@@ -195,7 +195,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
     >
       <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '10px' }} />TaskTree</Typography>
       <Grid container spacing={2} justifyContent="center" sx={{ marginTop: '30px', marginBottom: '20px' }}>
-        <Grid item xs={12} sm={3}>
+        <Grid item xs={12} sm={3} sx={{display: {xs: 'none', sm:'block'}}}>
           <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '100%' }} onClick={handleAddTask}>
             タスクを追加
           </Button>
@@ -220,6 +220,21 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
         setItems={setItems}
         onSelect={handleSelect}
       />
+      <Box
+        sx={{
+          zIndex: 1000,
+          display: { xs: 'flex', sm: 'none' }, // スマホサイズでのみ表示
+          position: 'fixed',
+          bottom: 20,
+          left: 80,
+          width: '100%',
+          justifyContent: 'left',
+        }}
+      >
+        <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '40%' }} onClick={handleAddTask}>
+          タスク追加
+        </Button>
+      </Box>
     </Box>
   );
 }
