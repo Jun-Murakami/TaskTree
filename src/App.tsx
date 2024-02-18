@@ -191,7 +191,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
             console.error('アプリの状態の保存に失敗しました。', error);
           });
       }
-    }, 10000); // 10秒のデバウンス
+    }, 3000); // 3秒のデバウンス
 
     return () => clearTimeout(debounceSave); // コンポーネントがアンマウントされるか、依存配列の値が変更された場合にタイマーをクリア
   }, [items, hideDoneItems, darkMode, token, saveOrUpdateAppStateToGoogleDrive]);
