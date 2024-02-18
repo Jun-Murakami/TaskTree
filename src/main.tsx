@@ -4,7 +4,6 @@ import App from './App.tsx';
 import { TreeItem } from './Tree/types';
 import './index.css';
 import { theme, darkTheme } from './mui_theme';
-import { useTheme } from '@mui/material/styles';
 import { CssBaseline, ThemeProvider, Button, CircularProgress } from '@mui/material';
 
 import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
@@ -64,8 +63,6 @@ function Main() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null); // Googleのアクセストークンを保持するための状態
-
-  const utheme = useTheme();
 
   const handleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -148,7 +145,7 @@ function Main() {
               position: 'fixed',
               bottom: 20,
               right: 30,
-              backgroundColor: utheme.palette.background.default,
+              backgroundColor: theme.palette.background.default,
             }}
           >
             ログアウト

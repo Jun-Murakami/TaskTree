@@ -20,6 +20,8 @@ interface AppProps {
 
 function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDarkMode, token }: AppProps) {
   const [lastSelectedItemId, setLastSelectedItemId] = useState<UniqueIdentifier | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
 
   const handleSelect = (id: UniqueIdentifier) => {
     setLastSelectedItemId(id);
@@ -196,6 +198,17 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
     return () => clearTimeout(debounceSave); // コンポーネントがアンマウントされるか、依存配列の値が変更された場合にタイマーをクリア
   }, [items, hideDoneItems, darkMode, token, saveOrUpdateAppStateToGoogleDrive]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setIsScrolled(offset > 50); // 50px以上スクロールしたらtrueにする
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -206,7 +219,13 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
     >
       <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '10px' }} />TaskTree</Typography>
       <Grid container spacing={2} justifyContent="center" sx={{ marginTop: {xs:0, sm:'30px'}, marginBottom: '20px' }}>
-        <Grid item xs={12} sm={3} sx={{display: {xs: 'none', sm:'block'}}}>
+        <Grid item xs={12} sm={3} sx={{
+          display: {xs: 'none', sm:'block'}, // スマホサイズで非表示
+          position: isScrolled ? 'fixed' : 'relative', // スクロールに応じて位置を固定
+          top: isScrolled ? 0 : 'auto', // スクロール時は上部に固定
+          zIndex: isScrolled ? 1000 : 'auto', // スクロール時は他の要素より前面に
+          width: isScrolled ? '100%' : 'auto', // スクロール時は幅を100%に
+        }}>
           <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '100%' }} onClick={handleAddTask}>
             タスクを追加
           </Button>
