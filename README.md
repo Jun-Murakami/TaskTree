@@ -6,7 +6,8 @@ https://task--tree.web.app/
 利用には Google アカウントが必要です。  
 タスクデータはユーザーの GoogleDrive に保存され、アプリ側では保持していません。
 
-<img width="742" alt="スクリーンショット 2024-02-18 15 51 02" src="https://github.com/Jun-Murakami/TaskTree/assets/126404131/e95fb9e0-b5d1-4fd3-a8ac-54d9f617d973">
+<img width="816" alt="スクリーンショット 2024-02-18 21 34 48" src="https://github.com/Jun-Murakami/TaskTree/assets/126404131/7a74c010-ab00-45ab-9591-fd72e7c6a2b1">
+
 
 
 ## プライバシーポリシー
