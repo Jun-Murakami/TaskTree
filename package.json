@@ -1,7 +1,7 @@
 {
   "name": "tasktree",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,13 +18,8 @@
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
     "@react-oauth/google": "^0.12.1",
-    "@types/gapi": "^0.0.47",
-    "@types/gapi.auth2": "^0.0.60",
-    "axios": "^1.6.7",
     "classnames": "^2.5.1",
     "firebase": "^10.8.0",
-    "gapi": "^0.0.3",
-    "gapi-script": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

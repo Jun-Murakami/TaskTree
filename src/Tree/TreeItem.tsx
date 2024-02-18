@@ -88,7 +88,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
       borderColor: theme.palette.divider,
       boxSizing: 'border-box',
       ...(clone && {
-        opacity: 0.6,
+        opacity: 0.7,
         position: 'absolute',
         boxShadow: '0px 15px 15px 0 rgba(34, 33, 81, 0.1)',
       }),
@@ -149,7 +149,14 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
         <Stack direction='row' ref={ref} style={style} sx={stackStyles(clone, ghost)}>
           {id !== 'trash' ? (
             <Button
-              sx={{ color: theme.palette.grey[500], cursor: 'grab', width: '30px', minWidth: '30px', height: '30px',margin: 'auto 0'}}
+              sx={{
+                color: theme.palette.grey[500],
+                cursor: 'grab',
+                width: '30px',
+                minWidth: '30px',
+                height: '30px',
+                margin: 'auto 0',
+              }}
               onClick={() => id !== undefined && onSelect?.(id)}
               {...handleProps}
             >
@@ -157,7 +164,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
             </Button>
           ) : (
             <Button
-              sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px',margin: 'auto 0'}}
+              sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px', margin: 'auto 0' }}
               onClick={() => id !== undefined && onSelect?.(id)}
             >
               <DeleteIcon />
@@ -165,7 +172,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
           )}
           {onCollapse && (
             <Button
-              sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px',margin: 'auto 0' }}
+              sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px', margin: 'auto 0' }}
               onClick={() => {
                 onCollapse?.();
                 id !== undefined && onSelect?.(id);
@@ -179,7 +186,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
           {id !== 'trash' ? (
             <>
               <Checkbox
-                sx={{ width: '30px', minWidth: '30px', height: '30px',margin: 'auto 0' }}
+                sx={{ width: '30px', minWidth: '30px', height: '30px', margin: 'auto 0' }}
                 checked={done}
                 onClick={() => id !== undefined && onSelect?.(id)}
                 onChange={(e) => onChangeDone?.(e.target.checked)}
@@ -204,13 +211,16 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
                 }}
               />
               {!clone && onRemove && (
-                <Button sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px',margin: 'auto 0' }} onClick={onRemove}>
+                <Button
+                  sx={{ color: theme.palette.text.secondary, width: '30px', minWidth: '30px', height: '30px', margin: 'auto 0' }}
+                  onClick={onRemove}
+                >
                   <CloseIcon />
                 </Button>
               )}
             </>
           ) : (
-            <Typography sx={{ py: '10px',fontSize: '0.9rem', margin: 'auto 5px' }}> ゴミ箱 </Typography>
+            <Typography sx={{ py: '10px', fontSize: '0.9rem', margin: 'auto 5px' }}> ゴミ箱 </Typography>
           )}
           {clone && childCount && childCount > 1 ? <Badge badgeContent={childCount} color='primary' /> : null}
         </Stack>

@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useCallback, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Dispatch, SetStateAction } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { findMaxId, isDescendantOfTrash } from './Tree/utilities';
 import { SortableTree } from './Tree/SortableTree';
 import type { TreeItem } from './Tree/types';
 import { styled } from '@mui/material/styles';
-import { FormControlLabel, Switch, Button, Box, Typography, Grid } from '@mui/material';
+import { FormControlLabel, Switch, Button, Box, Typography, Grid, IconButton } from '@mui/material';
+
 import AddIcon from '@mui/icons-material/Add';
+import UploadIcon from '@mui/icons-material/Upload';
+import DownloadIcon from '@mui/icons-material/Download';
 import './App.css';
 
 interface AppProps {
@@ -21,7 +24,6 @@ interface AppProps {
 function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDarkMode, token }: AppProps) {
   const [lastSelectedItemId, setLastSelectedItemId] = useState<UniqueIdentifier | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-
 
   const handleSelect = (id: UniqueIdentifier) => {
     setLastSelectedItemId(id);
@@ -77,6 +79,56 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
       const updatedItems = addItemToNestedChildren(items, lastSelectedItemId, newTask);
       setItems(updatedItems);
     }
+  };
+
+  const handleDownloadAppState = () => {
+    const appState = { items, hideDoneItems, darkMode };
+    const appStateJSON = JSON.stringify(appState, null, 2); // 読みやすい形式でJSONを整形
+    const blob = new Blob([appStateJSON], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'TaskTree_Backup.json'; // ダウンロードするファイルの名前
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const hiddenFileInput = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    hiddenFileInput.current?.click();
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target?.result;
+      try {
+        const appState = JSON.parse(text as string);
+        const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
+        const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
+        const hasDarkMode = typeof appState.darkMode === 'boolean';
+        if (!hasTrash || !hasHideDoneItems || !hasDarkMode) {
+          alert('無効なファイル形式です。');
+          return;
+        } else {
+          setItems(appState.items);
+          setHideDoneItems(appState.hideDoneItems);
+          setDarkMode(appState.darkMode);
+          alert('ファイルが正常に読み込まれました。');
+        }
+      } catch (error) {
+        alert('ファイルの読み込みに失敗しました。');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
@@ -217,27 +269,42 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
         margin: '0 auto', // 中央寄せ
       }}
     >
-      <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '10px' }} />TaskTree</Typography>
-      <Grid container spacing={2} justifyContent="center" sx={{ marginTop: {xs:0, sm:'30px'}, marginBottom: '20px' }}>
-        <Grid item xs={12} sm={3} sx={{
-          display: {xs: 'none', sm:'block'}, // スマホサイズで非表示
-          position: isScrolled ? 'fixed' : 'relative', // スクロールに応じて位置を固定
-          top: isScrolled ? 0 : 'auto', // スクロール時は上部に固定
-          zIndex: isScrolled ? 1000 : 'auto', // スクロール時は他の要素より前面に
-          width: isScrolled ? '100%' : 'auto', // スクロール時は幅を100%に
-        }}>
+      <Typography variant='h3'>
+        <img src='/TaskTree.svg' alt='Task Tree' style={{ width: '35px', height: '35px', marginRight: '10px' }} />
+        TaskTree
+      </Typography>
+      <Grid container spacing={2} justifyContent='center' sx={{ marginTop: { xs: 0, sm: '30px' }, marginBottom: '20px' }}>
+        <Grid
+          item
+          xs={12}
+          sm={3}
+          sx={{
+            display: { xs: 'none', sm: 'block' }, // スマホサイズで非表示
+            position: isScrolled ? 'fixed' : 'relative', // スクロールに応じて位置を固定
+            top: isScrolled ? 0 : 'auto', // スクロール時は上部に固定
+            zIndex: isScrolled ? 1000 : 'auto', // スクロール時は他の要素より前面に
+            width: isScrolled ? '100%' : 'auto', // スクロール時は幅を100%に
+          }}
+        >
           <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '100%' }} onClick={handleAddTask}>
             タスクを追加
           </Button>
         </Grid>
-        <Grid item xs={8} sm={3}>
-          <FormControlLabel control={<Switch checked={hideDoneItems} onChange={handleSwitchChange} />} label='完了を非表示' />
-        </Grid>
-        <Grid item xs={4} sm={3}>
+        <Grid item xs={6} sm={3}>
           <FormControlLabel
-            control={<MaterialUISwitch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />}
-            label='Mode'
+            control={<Switch checked={hideDoneItems} onChange={handleSwitchChange} />}
+            label={<Typography sx={{ fontSize: '0.9em' }}>完了を非表示</Typography>}
           />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <FormControlLabel control={<MaterialUISwitch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />} label='' />
+          <input type='file' ref={hiddenFileInput} onChange={handleFileUpload} style={{ display: 'none' }} accept='.json' />
+          <IconButton onClick={handleClick}>
+            <UploadIcon />
+          </IconButton>
+          <IconButton onClick={handleDownloadAppState}>
+            <DownloadIcon />
+          </IconButton>
         </Grid>
       </Grid>
       <SortableTree

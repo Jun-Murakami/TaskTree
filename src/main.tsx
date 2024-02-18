@@ -2,58 +2,16 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import { TreeItem } from './Tree/types';
+import { initialItems } from './Tree/mock';
 import './index.css';
 import { theme, darkTheme } from './mui_theme';
-import { CssBaseline, ThemeProvider, Button, CircularProgress } from '@mui/material';
-
+import { CssBaseline, ThemeProvider, Button, CircularProgress, Typography, Paper } from '@mui/material';
 import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
-
-const initialItems: TreeItem[] = [
-  {
-    id: '0',
-    value: '案件1',
-    done: false,
-    children: [
-      {
-        id: '1',
-        value: 'すぐやる',
-        done: false,
-        children: [
-          { id: '2', value: 'Aさんに電話を掛ける\n000-0000-0000', done: false, children: [] },
-          { id: '3', value: 'Bさんにメールを返す', done: true, children: [] },
-        ],
-      },
-      { id: '4', value: 'あとでやる', done: false, children: [] },
-      { id: '5', value: '後で考える', done: false, children: [] },
-      { id: '6', value: 'いつかやる', done: false, children: [] },
-    ],
-  },
-  {
-    id: '7',
-    value: '案件2',
-    done: false,
-    children: [
-      { id: '8', value: 'すぐやる', done: false, children: [] },
-      { id: '9', value: 'あとでやる', done: false, children: [] },
-    ],
-  },
-  {
-    id: '10',
-    value: 'プライベート',
-    done: false,
-    children: [],
-  },
-  {
-    id: 'trash',
-    value: 'Trash',
-    children: [],
-  },
-];
 
 interface AppState {
   items: TreeItem[];
   hideDoneItems: boolean;
-  darkMode?: boolean; // darkModeはオプショナルと仮定しています
+  darkMode: boolean;
 }
 
 function Main() {
@@ -103,7 +61,7 @@ function Main() {
             headers: new Headers({ Authorization: `Bearer ${token}` }),
           });
           const appState = await fileResponse.json();
-        
+
           if (isValidAppState(appState)) {
             setItems(appState.items);
             setHideDoneItems(appState.hideDoneItems);
@@ -148,13 +106,28 @@ function Main() {
               backgroundColor: theme.palette.background.default,
             }}
           >
-            ログアウト
+            Logout
           </Button>
         </>
       ) : (
-        <Button onClick={() => handleLogin()} variant={'contained'}>
-          Googleでログイン
-        </Button>
+        <>
+          <Typography sx={{ marginBottom: 4 }} variant='h3'>
+            <img src='/TaskTree.svg' alt='Task Tree' style={{ width: '35px', height: '35px', marginRight: '10px' }} />
+            TaskTree
+          </Typography>
+          <Button onClick={() => handleLogin()} variant={'contained'}>
+            Googleでログイン
+          </Button>
+          <Paper sx={{ maxWidth: 300, margin: 'auto', marginTop: 4 }}>
+            <Typography variant='body2' sx={{ textAlign: 'left', p: 2 }} gutterBottom>
+              このアプリケーションはユーザーデータの保存にGoogle Driveを使用します。
+              <br />
+              最初のログイン時には、Google Driveにアクセスするための許可が必要です。
+              <br />
+              Google Driveへのアクセスはこのアプリケーションが作成したファイルのみが対象となります。
+            </Typography>
+          </Paper>
+        </>
       )}
     </ThemeProvider>
   );

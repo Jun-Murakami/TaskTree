@@ -14,7 +14,7 @@ export const theme = createTheme({
 
   typography: {
     fontFamily: [
-      '"M PLUS Rounded 1c"',
+      '"M PLUS 1p"',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
@@ -41,7 +41,7 @@ export const darkTheme = createTheme({
   },
   typography: {
     fontFamily: [
-      '"M PLUS Rounded 1c"',
+      '"M PLUS 1p"',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
