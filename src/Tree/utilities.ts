@@ -1,7 +1,7 @@
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 
-import type { FlattenedItem, TreeItem, TreeItems } from './types';
+import type { FlattenedItem, TreeItem, TreeItems, AppState } from './types';
 
 export const iOS = /iPad|iPhone|iPod/.test(navigator.platform);
 
@@ -154,6 +154,13 @@ export function isDescendantOfTrash(items: TreeItems, itemId: UniqueIdentifier):
   if (!parentItem) return false;
   if (parentItem.id === 'trash') return true;
   return isDescendantOfTrash(items, parentItem.id);
+}
+
+export   function isValidAppState(appState: AppState): boolean {
+  const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
+  const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
+  const hasDarkMode = typeof appState.darkMode === 'boolean';
+  return hasTrash && hasHideDoneItems && hasDarkMode;
 }
 
 export function findMaxId(items: TreeItems, currentMax = 0) {

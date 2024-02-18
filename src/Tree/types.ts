@@ -21,3 +21,9 @@ export type SensorContext = MutableRefObject<{
   items: FlattenedItem[];
   offset: number;
 }>;
+
+export type AppState = {
+  items: TreeItem[];
+  hideDoneItems: boolean;
+  darkMode: boolean;
+}

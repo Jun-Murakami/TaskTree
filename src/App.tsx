@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, Dispatch, SetStateAction } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
-import { findMaxId, isDescendantOfTrash } from './Tree/utilities';
+import { findMaxId, isDescendantOfTrash, isValidAppState } from './Tree/utilities';
 import { SortableTree } from './Tree/SortableTree';
 import type { TreeItem } from './Tree/types';
 import { styled } from '@mui/material/styles';
@@ -112,10 +112,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
       const text = e.target?.result;
       try {
         const appState = JSON.parse(text as string);
-        const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
-        const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
-        const hasDarkMode = typeof appState.darkMode === 'boolean';
-        if (!hasTrash || !hasHideDoneItems || !hasDarkMode) {
+        if (!isValidAppState(appState)) {
           alert('無効なファイル形式です。');
           return;
         } else {
@@ -192,11 +189,8 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
   const saveOrUpdateAppStateToGoogleDrive = useCallback(async (token: string, appStateJSON: string) => {
     // 条件チェックを追加
     const appState = JSON.parse(appStateJSON);
-    const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
-    const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
-    const hasDarkMode = typeof appState.darkMode === 'boolean';
 
-    if (!hasTrash || !hasHideDoneItems || !hasDarkMode) {
+    if (!isValidAppState(appState)) {
       console.error('保存する状態が指定された条件を満たしていません。');
       return;
     }
@@ -229,7 +223,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
     });
 
     return response.json();
-  }, []); // この関数が依存する外部の変数がない場合は、依存配列を空にします
+  }, []);
 
   // 状態が変更されたとき（例: アイテムの追加、完了タスクの表示/非表示の切り替え、ダークモードの切り替え）に呼び出す
   useEffect(() => {

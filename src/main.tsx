@@ -3,16 +3,11 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import { TreeItem } from './Tree/types';
 import { initialItems } from './Tree/mock';
+import { isValidAppState } from './Tree/utilities';
 import './index.css';
 import { theme, darkTheme } from './mui_theme';
 import { CssBaseline, ThemeProvider, Button, CircularProgress, Typography, Paper } from '@mui/material';
 import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
-
-interface AppState {
-  items: TreeItem[];
-  hideDoneItems: boolean;
-  darkMode: boolean;
-}
 
 function Main() {
   const [darkMode, setDarkMode] = useState(false);
@@ -36,13 +31,6 @@ function Main() {
   const handleLogout = () => {
     googleLogout();
     setIsLoggedIn(false);
-  };
-
-  const isValidAppState = (appState: AppState): boolean => {
-    const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
-    const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
-    const hasDarkMode = typeof appState.darkMode === 'boolean';
-    return hasTrash && hasHideDoneItems && hasDarkMode;
   };
 
   useEffect(() => {
