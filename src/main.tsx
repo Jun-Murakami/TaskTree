@@ -31,6 +31,8 @@ function Main() {
     scope: 'https://www.googleapis.com/auth/drive.file',
   });
 
+  const currentYear = new Date().getFullYear()
+
   const handleLogout = () => {
     googleLogout();
     setIsLoggedIn(false);
@@ -127,6 +129,7 @@ function Main() {
               Google Driveへのアクセスはこのアプリケーションが作成したファイルのみが対象となります。ユーザーデータがサービス提供者に送信されることはありません。
             </Typography>
           </Paper>
+          <Typography variant='caption'><a href='https://github.com/Jun-Murakami/TaskTree'>©{currentYear} Jun Murakami</a></Typography>
         </>
       )}
     </ThemeProvider>
