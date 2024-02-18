@@ -185,6 +185,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
                 onChange={(e) => onChangeDone?.(e.target.checked)}
               />
               <TextField
+                variant='standard'
                 value={value}
                 onChange={(e) => onChange?.(e.target.value)}
                 onClick={() => id !== undefined && onSelect?.(id)}

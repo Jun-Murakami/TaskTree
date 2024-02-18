@@ -4,7 +4,7 @@ import { findMaxId, isDescendantOfTrash } from './Tree/utilities';
 import { SortableTree } from './Tree/SortableTree';
 import type { TreeItem } from './Tree/types';
 import { styled } from '@mui/material/styles';
-import { FormControlLabel, Switch, Button, Box, Typography, Stack } from '@mui/material';
+import { FormControlLabel, Switch, Button, Box, Typography, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import './App.css';
 
@@ -193,17 +193,23 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
         margin: '0 auto', // 中央寄せ
       }}
     >
-      <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '15px' }} />Task Tree</Typography>
-      <Stack direction={'row'} spacing={2} sx={{ marginTop: '30px', marginBottom: '20px', justifyContent: 'center' }}>
-        <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '150px' }} onClick={handleAddTask}>
-          タスク追加
-        </Button>
-        <FormControlLabel control={<Switch checked={hideDoneItems} onChange={handleSwitchChange} />} label='完了タスクを非表示' />
-        <FormControlLabel
-          control={<MaterialUISwitch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />}
-          label='Mode'
-        />
-      </Stack>
+      <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '10px' }} />TaskTree</Typography>
+      <Grid container spacing={2} justifyContent="center" sx={{ marginTop: '30px', marginBottom: '20px' }}>
+        <Grid item xs={12} sm={3}>
+          <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '100%' }} onClick={handleAddTask}>
+            タスクを追加
+          </Button>
+        </Grid>
+        <Grid item xs={8} sm={3}>
+          <FormControlLabel control={<Switch checked={hideDoneItems} onChange={handleSwitchChange} />} label='完了を非表示' />
+        </Grid>
+        <Grid item xs={4} sm={3}>
+          <FormControlLabel
+            control={<MaterialUISwitch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />}
+            label='Mode'
+          />
+        </Grid>
+      </Grid>
       <SortableTree
         collapsible
         indicator
