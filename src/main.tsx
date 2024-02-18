@@ -51,6 +51,12 @@ const initialItems: TreeItem[] = [
   },
 ];
 
+interface AppState {
+  items: TreeItem[];
+  hideDoneItems: boolean;
+  darkMode?: boolean; // darkModeはオプショナルと仮定しています
+}
+
 function Main() {
   const [darkMode, setDarkMode] = useState(false);
   const [items, setItems] = useState<TreeItem[]>([]);
@@ -75,6 +81,13 @@ function Main() {
     setIsLoggedIn(false);
   };
 
+  const isValidAppState = (appState: AppState): boolean => {
+    const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
+    const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
+    const hasDarkMode = typeof appState.darkMode === 'boolean';
+    return hasTrash && hasHideDoneItems && hasDarkMode;
+  };
+
   useEffect(() => {
     const restoreAppState = async () => {
       setIsLoading(true);
@@ -88,15 +101,19 @@ function Main() {
         const fileId = result.files.length > 0 ? result.files[0].id : null;
 
         if (fileId) {
-          // ファイルが存在する場合の処理
           const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
             method: 'GET',
             headers: new Headers({ Authorization: `Bearer ${token}` }),
           });
           const appState = await fileResponse.json();
-          setItems(appState.items);
-          setHideDoneItems(appState.hideDoneItems);
-          setDarkMode(appState.darkMode);
+        
+          if (isValidAppState(appState)) {
+            setItems(appState.items);
+            setHideDoneItems(appState.hideDoneItems);
+            setDarkMode(appState.darkMode);
+          } else {
+            setItems(initialItems);
+          }
         } else {
           // ファイルが存在しない場合、initialItemsを使用して状態を初期化
           setItems(initialItems);

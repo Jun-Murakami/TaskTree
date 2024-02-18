@@ -136,6 +136,17 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
 
   // Google Driveに状態を保存する関数（同名のファイルを上書き）
   const saveOrUpdateAppStateToGoogleDrive = useCallback(async (token: string, appStateJSON: string) => {
+    // 条件チェックを追加
+    const appState = JSON.parse(appStateJSON);
+    const hasTrash = appState.items.some((item: TreeItem) => item.id === 'trash');
+    const hasHideDoneItems = typeof appState.hideDoneItems === 'boolean';
+    const hasDarkMode = typeof appState.darkMode === 'boolean';
+
+    if (!hasTrash || !hasHideDoneItems || !hasDarkMode) {
+      console.error('保存する状態が指定された条件を満たしていません。');
+      return;
+    }
+
     const fileName = 'TaskTree.json';
     const fileId = await getFileIdByName(token, fileName);
 
@@ -194,7 +205,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
       }}
     >
       <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '10px' }} />TaskTree</Typography>
-      <Grid container spacing={2} justifyContent="center" sx={{ marginTop: '30px', marginBottom: '20px' }}>
+      <Grid container spacing={2} justifyContent="center" sx={{ marginTop: {xs:0, sm:'30px'}, marginBottom: '20px' }}>
         <Grid item xs={12} sm={3} sx={{display: {xs: 'none', sm:'block'}}}>
           <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '100%' }} onClick={handleAddTask}>
             タスクを追加
