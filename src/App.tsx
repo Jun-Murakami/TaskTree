@@ -193,7 +193,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
         margin: '0 auto', // 中央寄せ
       }}
     >
-      <Typography variant='h3'>Task Tree</Typography>
+      <Typography variant='h3'><img src="/TaskTree.svg" alt="Task Tree" style={{ width: '35px', height: '35px',marginRight: '15px' }} />Task Tree</Typography>
       <Stack direction={'row'} spacing={2} sx={{ marginTop: '30px', marginBottom: '20px', justifyContent: 'center' }}>
         <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '150px' }} onClick={handleAddTask}>
           タスク追加

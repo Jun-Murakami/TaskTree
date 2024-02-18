@@ -4,7 +4,7 @@ import App from './App.tsx';
 import { TreeItem } from './Tree/types';
 import './index.css';
 import { theme, darkTheme } from './mui_theme';
-import { CssBaseline, ThemeProvider, Button } from '@mui/material';
+import { CssBaseline, ThemeProvider, Button, CircularProgress } from '@mui/material';
 
 import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
 
@@ -55,6 +55,7 @@ function Main() {
   const [items, setItems] = useState<TreeItem[]>([]);
   const [hideDoneItems, setHideDoneItems] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null); // Googleのアクセストークンを保持するための状態
 
   const handleLogin = useGoogleLogin({
@@ -73,6 +74,7 @@ function Main() {
 
   useEffect(() => {
     const restoreAppState = async () => {
+      setIsLoading(true);
       if (isLoggedIn && token) {
         const fileName = 'TaskTree.json';
         const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'`, {
@@ -97,6 +99,7 @@ function Main() {
           setItems(initialItems);
         }
       }
+      setIsLoading(false);
     };
 
     restoreAppState();
@@ -116,6 +119,7 @@ function Main() {
             setDarkMode={setDarkMode}
             token={token}
           />
+          {isLoading && <CircularProgress />}
           <Button
             onClick={handleLogout}
             variant='outlined'
