@@ -1,4 +1,4 @@
-import { forwardRef, HTMLAttributes, useState } from 'react';
+import { forwardRef, HTMLAttributes, useState, useEffect } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { useTheme } from '@mui/material/styles';
 import { ListItem, Stack, Badge, TextField, Checkbox, Button, Typography } from '@mui/material';
@@ -63,6 +63,10 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
     const theme = useTheme();
     const [isFocusedOrHovered, setIsFocusedOrHovered] = useState(false);
 
+    useEffect(() => {
+      const timer = setTimeout(() => setIsFocusedOrHovered(false), 300);
+      return () => clearTimeout(timer);
+    }, []);
 
     const stackStyles = (clone: boolean | undefined, ghost: boolean | undefined) => ({
       width: '100%',

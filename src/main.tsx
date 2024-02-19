@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import { TreeItem } from './Tree/types';
-import { initialItems } from './Tree/mock';
-import { isValidAppState } from './Tree/utilities';
+import { useAppStateSync } from './hooks/useAppStateSync';
 import './index.css';
 import { theme, darkTheme } from './mui_theme';
 import { CssBaseline, ThemeProvider, Button, CircularProgress, Typography, Paper } from '@mui/material';
@@ -26,49 +25,26 @@ function Main() {
     scope: 'https://www.googleapis.com/auth/drive.file',
   });
 
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   const handleLogout = () => {
     googleLogout();
     setIsLoggedIn(false);
   };
 
-  useEffect(() => {
-    const restoreAppState = async () => {
-      setIsLoading(true);
-      if (isLoggedIn && token) {
-        const fileName = 'TaskTree.json';
-        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'`, {
-          method: 'GET',
-          headers: new Headers({ Authorization: `Bearer ${token}` }),
-        });
-        const result = await response.json();
-        const fileId = result.files.length > 0 ? result.files[0].id : null;
-
-        if (fileId) {
-          const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-            method: 'GET',
-            headers: new Headers({ Authorization: `Bearer ${token}` }),
-          });
-          const appState = await fileResponse.json();
-
-          if (isValidAppState(appState)) {
-            setItems(appState.items);
-            setHideDoneItems(appState.hideDoneItems);
-            setDarkMode(appState.darkMode);
-          } else {
-            setItems(initialItems);
-          }
-        } else {
-          // ファイルが存在しない場合、initialItemsを使用して状態を初期化
-          setItems(initialItems);
-        }
-      }
-      setIsLoading(false);
-    };
-
-    restoreAppState();
-  }, [isLoggedIn, token]);
+  // 状態の読み込みと保存を行うカスタムフック
+  useAppStateSync(
+    items,
+    setItems,
+    hideDoneItems,
+    setHideDoneItems,
+    darkMode,
+    setDarkMode,
+    token,
+    isLoggedIn,
+    setIsLoggedIn,
+    setIsLoading
+  );
 
   return (
     <ThemeProvider theme={darkMode ? darkTheme : theme}>
@@ -82,7 +58,6 @@ function Main() {
             setHideDoneItems={setHideDoneItems}
             darkMode={darkMode}
             setDarkMode={setDarkMode}
-            token={token}
           />
           {isLoading && <CircularProgress />}
           <Button
@@ -114,10 +89,13 @@ function Main() {
               <br />
               最初のログイン時には、Google Driveにアクセスするための許可が必要です。
               <br />
-              Google Driveへのアクセスはこのアプリケーションが作成したファイルのみが対象となります。ユーザーデータがサービス提供者に送信されることはありません。
+              Google
+              Driveへのアクセスはこのアプリケーションが作成したファイルのみが対象となります。ユーザーデータがサービス提供者に送信されることはありません。
             </Typography>
           </Paper>
-          <Typography variant='caption'><a href='https://github.com/Jun-Murakami/TaskTree'>©{currentYear} Jun Murakami</a></Typography>
+          <Typography variant='caption'>
+            <a href='https://github.com/Jun-Murakami/TaskTree'>©{currentYear} Jun Murakami</a>
+          </Typography>
         </>
       )}
     </ThemeProvider>

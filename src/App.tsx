@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { findMaxId, isDescendantOfTrash, isValidAppState } from './Tree/utilities';
 import { SortableTree } from './Tree/SortableTree';
@@ -18,10 +18,9 @@ interface AppProps {
   setHideDoneItems: Dispatch<SetStateAction<boolean>>; // この行を追加
   darkMode: boolean;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
-  token: string | null;
 }
 
-function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDarkMode, token }: AppProps) {
+function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDarkMode }: AppProps) {
   const [lastSelectedItemId, setLastSelectedItemId] = useState<UniqueIdentifier | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -82,7 +81,7 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
   };
 
   const handleDownloadAppState = () => {
-    const appState = { items, hideDoneItems, darkMode };
+    const appState = { items, hideDoneItems, darkMode, lastUpdated: new Date() };
     const appStateJSON = JSON.stringify(appState, null, 2); // 読みやすい形式でJSONを整形
     const blob = new Blob([appStateJSON], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -174,75 +173,6 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
       borderRadius: 20 / 2,
     },
   }));
-
-  // Google DriveからファイルIDを検索する関数
-  const getFileIdByName = async (token: string, fileName: string) => {
-    const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'`, {
-      method: 'GET',
-      headers: new Headers({ Authorization: `Bearer ${token}` }),
-    });
-    const result = await response.json();
-    return result.files.length > 0 ? result.files[0].id : null;
-  };
-
-  // Google Driveに状態を保存する関数（同名のファイルを上書き）
-  const saveOrUpdateAppStateToGoogleDrive = useCallback(async (token: string, appStateJSON: string) => {
-    // 条件チェックを追加
-    const appState = JSON.parse(appStateJSON);
-
-    if (!isValidAppState(appState)) {
-      console.error('保存する状態が指定された条件を満たしていません。');
-      return;
-    }
-
-    const fileName = 'TaskTree.json';
-    const fileId = await getFileIdByName(token, fileName);
-
-    const metadata = {
-      name: fileName,
-      mimeType: 'application/json',
-    };
-
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', new Blob([appStateJSON], { type: 'application/json' }));
-
-    let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-    let method = 'POST';
-
-    // 既存のファイルが見つかった場合、URLとメソッドを更新
-    if (fileId) {
-      url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
-      method = 'PATCH';
-    }
-
-    const response = await fetch(url, {
-      method: method,
-      headers: new Headers({ Authorization: `Bearer ${token}` }),
-      body: form,
-    });
-
-    return response.json();
-  }, []);
-
-  // 状態が変更されたとき（例: アイテムの追加、完了タスクの表示/非表示の切り替え、ダークモードの切り替え）に呼び出す
-  useEffect(() => {
-    const debounceSave = setTimeout(() => {
-      if (token) {
-        const appState = { items, hideDoneItems, darkMode };
-        const appStateJSON = JSON.stringify(appState);
-        saveOrUpdateAppStateToGoogleDrive(token, appStateJSON)
-          .then(() => {
-            //console.log("アプリの状態がGoogle Driveに保存されました。");
-          })
-          .catch((error: unknown) => {
-            console.error('アプリの状態の保存に失敗しました。', error);
-          });
-      }
-    }, 3000); // 3秒のデバウンス
-
-    return () => clearTimeout(debounceSave); // コンポーネントがアンマウントされるか、依存配列の値が変更された場合にタイマーをクリア
-  }, [items, hideDoneItems, darkMode, token, saveOrUpdateAppStateToGoogleDrive]);
 
   useEffect(() => {
     const handleScroll = () => {
