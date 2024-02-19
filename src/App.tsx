@@ -214,7 +214,13 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
             width: isScrolled ? '100%' : 'auto', // スクロール時は幅を100%に
           }}
         >
-          <Button variant='contained' color='primary' startIcon={<AddIcon />} sx={{ width: '100%' }} onClick={handleAddTask}>
+          <Button
+            variant='contained'
+            color='primary'
+            startIcon={<AddIcon />}
+            sx={{ width: '100%', maxWidth: '400px' }}
+            onClick={handleAddTask}
+          >
             タスクを追加
           </Button>
         </Grid>

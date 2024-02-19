@@ -14,22 +14,29 @@ function Main() {
   const [hideDoneItems, setHideDoneItems] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null); // Googleのアクセストークンを保持するための状態
+  const [token, setToken] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState(new Date(0));
 
   const handleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setIsLoggedIn(true);
       setToken(tokenResponse.access_token);
+      setMessage(null);
     },
-    onError: (errorResponse) => console.log(errorResponse),
+    onError: (errorResponse) => setMessage(errorResponse.toString()),
     scope: 'https://www.googleapis.com/auth/drive.file',
   });
 
   const currentYear = new Date().getFullYear();
 
   const handleLogout = () => {
+    setLastUpdated(new Date(0));
     googleLogout();
     setIsLoggedIn(false);
+    setToken(null);
+    setItems([]);
+    setMessage('ログアウトしました。');
   };
 
   // 状態の読み込みと保存を行うカスタムフック
@@ -41,9 +48,13 @@ function Main() {
     darkMode,
     setDarkMode,
     token,
+    setToken,
     isLoggedIn,
     setIsLoggedIn,
-    setIsLoading
+    setIsLoading,
+    setMessage,
+    lastUpdated,
+    setLastUpdated
   );
 
   return (
@@ -83,6 +94,11 @@ function Main() {
           <Button onClick={() => handleLogin()} variant={'contained'}>
             Googleでログイン
           </Button>
+          {message && (
+            <Typography variant='body2' sx={{ marginY: 4 }}>
+              {message}
+            </Typography>
+          )}
           <Paper sx={{ maxWidth: 300, margin: 'auto', marginTop: 4 }}>
             <Typography variant='body2' sx={{ textAlign: 'left', p: 2 }} gutterBottom>
               このアプリケーションはユーザーデータの保存にGoogle Driveを使用します。
