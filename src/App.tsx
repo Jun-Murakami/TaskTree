@@ -194,7 +194,11 @@ function App({ items, setItems, hideDoneItems, setHideDoneItems, darkMode, setDa
       }}
     >
       <Typography variant='h3'>
-        <img src='/TaskTree.svg' alt='Task Tree' style={{ width: '35px', height: '35px', marginRight: '10px' }} />
+        <img
+          src='/TaskTree.svg'
+          alt='Task Tree'
+          style={{ width: '35px', height: '35px', marginTop: '30px', marginRight: '10px' }}
+        />
         TaskTree
       </Typography>
       <Grid container spacing={2} justifyContent='center' sx={{ marginTop: { xs: 0, sm: '30px' }, marginBottom: '20px' }}>

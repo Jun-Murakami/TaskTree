@@ -59,7 +59,7 @@ function Main() {
             darkMode={darkMode}
             setDarkMode={setDarkMode}
           />
-          {isLoading && <CircularProgress />}
+          {isLoading && <CircularProgress sx={{ marginTop: 2 }} />}
           <Button
             onClick={handleLogout}
             variant='outlined'

@@ -57,6 +57,7 @@ export const useAppStateSync = (
         }
       } else {
         setItems(initialItems);
+        if (setIsLoading) setIsLoading(false);
       }
     };
 

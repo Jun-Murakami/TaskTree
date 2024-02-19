@@ -210,7 +210,6 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
                   style: {
                     padding: 0,
                     margin: 0,
-                    marginLeft: '5px',
                     paddingTop: '3px',
                     paddingBottom: '3px',
                     fontSize: '0.9rem',
