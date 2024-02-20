@@ -8,6 +8,12 @@ import { theme, darkTheme } from './mui_theme';
 import { CssBaseline, ThemeProvider, Button, CircularProgress, Typography, Paper } from '@mui/material';
 import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
 
+declare global {
+  interface Window {
+    gapi: unknown;
+  }
+}
+
 function Main() {
   const [darkMode, setDarkMode] = useState(false);
   const [items, setItems] = useState<TreeItem[]>([]);
