@@ -28,37 +28,52 @@ export const useAppStateSync = (
     if (isLoggedIn && token) {
       const fetchAndSetAppState = async () => {
         if (!isLoggedIn || !token) return;
+        try {
+          const fileName = 'TaskTree.json';
+          const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'&fields=files(id, modifiedTime)`, {
+            method: 'GET',
+            headers: new Headers({ Authorization: `Bearer ${token}` }),
+          });
+          if (!searchResponse.ok) {
+            throw new Error('セッションがタイムアウトしました。');
+          }
+          const { files } = await searchResponse.json();
+          const file = files.length > 0 ? files[0] : null;
 
-        const fileName = 'TaskTree.json';
-        const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'&fields=files(id, modifiedTime)`, {
-          method: 'GET',
-          headers: new Headers({ Authorization: `Bearer ${token}` }),
-        });
-        const { files } = await searchResponse.json();
-        const file = files.length > 0 ? files[0] : null;
+          if (file) {
+            const fileModifiedTime = new Date(file.modifiedTime);
+            if (!lastUpdated || (fileModifiedTime.getTime() - lastUpdated.getTime()) > 3000) {
+              if (setIsLoading) setIsLoading(true);
+              const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
+                method: 'GET',
+                headers: new Headers({ Authorization: `Bearer ${token}` }),
+              });
+              const appState: AppState = await fileResponse.json();
 
-        if (file) {
-          const fileModifiedTime = new Date(file.modifiedTime);
-          if (!lastUpdated || (fileModifiedTime.getTime() - lastUpdated.getTime()) > 3000) {
-            if (setIsLoading) setIsLoading(true);
-            const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
-              method: 'GET',
-              headers: new Headers({ Authorization: `Bearer ${token}` }),
-            });
-            const appState: AppState = await fileResponse.json();
-
-            if (isValidAppState(appState)) {
-              setItems(appState.items);
-              setHideDoneItems(appState.hideDoneItems);
-              setDarkMode(appState.darkMode);
-              setLastUpdated(fileModifiedTime);
-              setIsLoadedFromExternal(true);
+              if (isValidAppState(appState)) {
+                setItems(appState.items);
+                setHideDoneItems(appState.hideDoneItems);
+                setDarkMode(appState.darkMode);
+                setLastUpdated(fileModifiedTime);
+                setIsLoadedFromExternal(true);
+              }
+              if (setIsLoading) setIsLoading(false);
             }
+          } else {
+            setItems(initialItems);
             if (setIsLoading) setIsLoading(false);
           }
-        } else {
-          setItems(initialItems);
-          if (setIsLoading) setIsLoading(false);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            setMessage('ログアウトしました。:' + error.message);
+          } else {
+            setMessage('ログアウトしました。セッションがタイムアウトしました。');
+          }
+          setLastUpdated(new Date(0));
+          setItems([]);
+          googleLogout();
+          setIsLoggedIn(false);
+          setToken(null);
         }
       };
 
@@ -68,6 +83,7 @@ export const useAppStateSync = (
       const interval = setInterval(fetchAndSetAppState, 10000);
       return () => clearInterval(interval);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, token, setDarkMode, setHideDoneItems, setIsLoading, setItems, lastUpdated, setLastUpdated]);
 
 
@@ -167,7 +183,7 @@ export const useAppStateSync = (
           })
           .catch((error: unknown) => {
             if (error instanceof Error) {
-              setMessage('ログアウトしました。' + error.message);
+              setMessage('ログアウトしました。:' + error.message);
             } else {
               setMessage('ログアウトしました。セッションがタイムアウトしました。');
             }
