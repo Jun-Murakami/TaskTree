@@ -169,7 +169,7 @@ export const useAppStateSync = (
             if (error instanceof Error) {
               setMessage('ログアウトしました。' + error.message);
             } else {
-              setMessage('ログアウトしました。予期せぬエラーが発生しました。');
+              setMessage('ログアウトしました。セッションがタイムアウトしました。');
             }
             setLastUpdated(new Date(0));
             setItems([]);
