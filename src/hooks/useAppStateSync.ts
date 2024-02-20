@@ -35,7 +35,7 @@ export const useAppStateSync = (
             headers: new Headers({ Authorization: `Bearer ${token}` }),
           });
           if (!searchResponse.ok) {
-            throw new Error('セッションがタイムアウトしました。');
+            throw new Error('セッションがタイムアウトしました。再度ログインを行ってください。');
           }
           const { files } = await searchResponse.json();
           const file = files.length > 0 ? files[0] : null;
@@ -65,7 +65,7 @@ export const useAppStateSync = (
           }
         } catch (error: unknown) {
           if (error instanceof Error) {
-            setMessage('ログアウトしました。:' + error.message);
+            setMessage('ログアウトしました。 : ' + error.message);
           } else {
             setMessage('ログアウトしました。セッションがタイムアウトしました。');
           }
@@ -183,9 +183,9 @@ export const useAppStateSync = (
           })
           .catch((error: unknown) => {
             if (error instanceof Error) {
-              setMessage('ログアウトしました。:' + error.message);
+              setMessage('ログアウトしました。 : ' + error.message);
             } else {
-              setMessage('ログアウトしました。セッションがタイムアウトしました。');
+              setMessage('ログアウトしました。セッションがタイムアウトしました。再度ログインを行ってください。');
             }
             setLastUpdated(new Date(0));
             setItems([]);
