@@ -108,6 +108,7 @@ function Main() {
               Google
               Driveへのアクセスはこのアプリケーションが作成したファイルのみが対象となります。ユーザーデータがサービス提供者に送信されることはありません。
               <br />
+              <br />
               Google Firebase に移行した新バージョンは<a href='https://tasktree-fb.web.app/'>こちら</a>
             </Typography>
           </Paper>
