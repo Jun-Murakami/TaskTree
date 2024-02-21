@@ -162,6 +162,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
                 minWidth: '30px',
                 height: '30px',
                 margin: 'auto 0',
+                touchAction: 'none',
               }}
               onClick={() => id !== undefined && onSelect?.(id)}
               {...handleProps}
