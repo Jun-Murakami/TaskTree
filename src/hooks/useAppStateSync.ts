@@ -174,7 +174,7 @@ export const useAppStateSync = (
   // 状態が変更されたとき（例: アイテムの追加、完了タスクの表示/非表示の切り替え、ダークモードの切り替え）にGoogle Driveに状態を保存
   useEffect(() => {
     const debounceSave = setTimeout(() => {
-      if (token && !isLoadedFromExternal) {
+      if (token && !isLoadedFromExternal && !items) {
         const appState = { items, hideDoneItems, darkMode };
         const appStateJSON = JSON.stringify(appState);
         saveOrUpdateAppStateToGoogleDrive(token, appStateJSON)
